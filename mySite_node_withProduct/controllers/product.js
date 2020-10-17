@@ -17,15 +17,34 @@ exports.create = (req, res) => {
             });
 
         }
+        //check for all fields
+        const {name, description, price, category, quantity, shipping} = fields;
+        if(!name || !description || !price || !quantity || !shipping){
+            return res.status(400),json({
+                error: "All fiels are required"
+            });
+        }
+
+
+
         let product = new Product(fields);
+
+        //ikb = 1000
+        //1mb = 1000000
+
         //console.log(fields);
         //console.log(product)
         if(files.photo){
-           // console.log(files.photo.type);
+           console.log("Files photos: ",files.photo);
+           if(files.photo.size > 1000000){
+               return res.status(400).json({
+                   error: "Image should be less than 1 mb size"
+               });
+           }
             product.photo.data = fs.readFileSync(files.photo.path);
             product.photo.contentType = files.photo.type;
 
-            console.log("Phototype: ",product.photo.contentType);
+            //console.log("Phototype: ",product.photo.contentType);
         }
         product.save((err, data)=> {
             if(err){
@@ -40,3 +59,23 @@ exports.create = (req, res) => {
     
    
 };
+
+//middleware
+exports.productById = (req, res, next, id) => {
+    Product.findById(id).exec((err, product) =>{
+        if(err || !product){
+            return res.status(400).json({
+                error: "Product not found"
+            });
+        }
+        req.product = product;
+        next();
+    });
+};
+
+// read teh product form the database
+exports.read = (req, res) => {
+   req.product.photo = undefined;
+   return res.json(req.product);
+
+}
