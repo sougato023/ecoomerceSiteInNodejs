@@ -3,7 +3,7 @@ const router = express.Router();
 
 
 //import user controllers
-const {userById} = require("../controllers/user");
+const {userById, read, update} = require("../controllers/user");
 const { requiresignin, isAuth, isAdmin } = require("../controllers/auth");
 
 router.param("userid",userById);
@@ -13,6 +13,7 @@ router.get("/secret/:userid", requiresignin, isAuth, isAdmin, (req,res) => {
         user: req.profile
     });
 });
-
+router.get("/user/:userid", requiresignin, isAuth, read)
+router.put("/user/update/:userid", requiresignin, isAdmin, isAuth, update);
 
 module.exports = router;
